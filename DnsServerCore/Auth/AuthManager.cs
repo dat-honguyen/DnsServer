@@ -60,7 +60,7 @@ namespace DnsServerCore.Auth
         bool _ssoAllowSignup;
         bool _ssoAllowSignupOnlyForMappedUsers = true;
         IReadOnlyDictionary<string, string> _ssoGroupMap;
-        bool _ssoUseQueryResponseMode;
+        bool _ssoAllowInsecureHttp;
 
         readonly Lock _saveLock = new Lock();
         bool _pendingSave;
@@ -248,9 +248,9 @@ namespace DnsServerCore.Auth
                 if (!string.IsNullOrEmpty(strSsoAllowSignupOnlyForMappedUsers))
                     SsoAllowSignupOnlyForMappedUsers = bool.Parse(strSsoAllowSignupOnlyForMappedUsers);
 
-                string strSsoUseQueryResponseMode = Environment.GetEnvironmentVariable("DNS_SERVER_SSO_USE_QUERY_RESPONSE_MODE");
-                if (!string.IsNullOrEmpty(strSsoUseQueryResponseMode))
-                    SsoUseQueryResponseMode = bool.Parse(strSsoUseQueryResponseMode);
+                string strSsoAllowInsecureHttp = Environment.GetEnvironmentVariable("DNS_SERVER_SSO_ALLOW_INSECURE_HTTP");
+                if (!string.IsNullOrEmpty(strSsoAllowInsecureHttp))
+                    SsoAllowInsecureHttp = bool.Parse(strSsoAllowInsecureHttp);
 
                 string strGroupMap = Environment.GetEnvironmentVariable("DNS_SERVER_SSO_GROUP_MAP");
                 if (!string.IsNullOrEmpty(strGroupMap))
@@ -406,6 +406,7 @@ namespace DnsServerCore.Auth
                 case 1:
                 case 2:
                 case 3:
+                case 4:
                     {
                         int count = bR.ReadByte();
 
@@ -550,10 +551,10 @@ namespace DnsServerCore.Auth
 
                         if (version >= 4)
                         {
-                            bool ssoUseQueryResponseMode = bR.ReadBoolean();
-                            if (_ssoUseQueryResponseMode != ssoUseQueryResponseMode)
+                            bool ssoAllowInsecureHttp = bR.ReadBoolean();
+                            if (_ssoAllowInsecureHttp != ssoAllowInsecureHttp)
                             {
-                                _ssoUseQueryResponseMode = ssoUseQueryResponseMode;
+                                _ssoAllowInsecureHttp = ssoAllowInsecureHttp;
                                 restartWebService = true;
                             }
                         }
@@ -715,7 +716,7 @@ namespace DnsServerCore.Auth
                 }
             }
 
-            bW.Write(_ssoUseQueryResponseMode);
+            bW.Write(_ssoAllowInsecureHttp);
         }
 
         #endregion
@@ -1480,10 +1481,10 @@ namespace DnsServerCore.Auth
         public bool SsoManagedGroups
         { get { return _ssoGroupMap is not null; } }
 
-        public bool SsoUseQueryResponseMode
+        public bool SsoAllowInsecureHttp
         {
-            get { return _ssoUseQueryResponseMode; }
-            set { _ssoUseQueryResponseMode = value; }
+            get { return _ssoAllowInsecureHttp; }
+            set { _ssoAllowInsecureHttp = value; }
         }
 
         #endregion

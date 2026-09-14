@@ -7059,7 +7059,7 @@ RESPONSE:
 		"ssoMetadataAddress": null,
 		"ssoAllowSignup": false,
 		"ssoAllowSignupOnlyForMappedUsers": true,
-		"ssoUseQueryResponseMode": false,
+		"ssoAllowInsecureHttp": false,
 		"ssoGroupMap": [],
 		"localGroups": [
 			"Administrators",
@@ -7095,7 +7095,7 @@ WHERE:
 - `ssoAllowSignup` (optional): Set to `true` to allow automatically provisioning of user accounts for new users signing in via Single Sign-On (SSO). Keep this option set to `false` if you do not expect new SSO users to sign up.
 - `ssoAllowSignupOnlyForMappedUsers` (optional): Set to `true` to allow a new user to sign up via Single Sign-On (SSO) only when the user is a member of at least one Remote Group that is mapped to a Local Group in the Group Map option below. This option allows SSO administrators to restrict SSO users to control who can sign up and get access based on their group memberships.
 - `ssoGroupMap` (optional): A pipe `|` separated table data with each row containing Remote Group name and a corresponding Local Group name. Maps Remote Groups at Single Sign-On (SSO) provider to Local Groups for both new and existing users signed up via Single Sign-On (SSO). A SSO user's group membership will be automatically synced to the mapped Local Groups each time they log in.
-- `ssoUseQueryResponseMode` (optional): Set to `true` to use the OpenID Connect (OIDC) `query` response mode for the SSO callback instead of the default `form_post`. The `form_post` mode sends the callback as a cross-site POST request, which requires the DNS Server's web console to be served over HTTPS for the browser to retain the correlation cookie (`SameSite=None` requires `Secure`). Enable this option if the web console is only reachable over plain HTTP.
+- `ssoAllowInsecureHttp` (optional): Set to `true` to allow the Single Sign-On (SSO) login to work when the DNS Server's web console is only reachable over plain HTTP (no TLS). By default the OIDC callback uses the `form_post` response mode and correlation/nonce cookies scoped `SameSite=None; Secure`, both of which require HTTPS to function in a browser. Enabling this option switches the callback to the `query` response mode (a plain GET redirect) and relaxes the correlation/nonce cookies to `SameSite=Lax` with a request-matching Secure policy, so the login flow completes without HTTPS. Only enable this if the web console is not reachable over HTTPS.
 
 RESPONSE:
 ```
@@ -7108,7 +7108,7 @@ RESPONSE:
 		"ssoMetadataAddress": null,
 		"ssoAllowSignup": false,
 		"ssoAllowSignupOnlyForMappedUsers": true,
-		"ssoUseQueryResponseMode": false,
+		"ssoAllowInsecureHttp": false,
 		"ssoGroupMap": [],
 		"localGroups": [
 			"Administrators",

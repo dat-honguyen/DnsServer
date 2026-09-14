@@ -352,7 +352,7 @@ namespace DnsServerCore
 
                 jsonWriter.WriteBoolean("ssoAllowSignup", _dnsWebService._authManager.SsoAllowSignup);
                 jsonWriter.WriteBoolean("ssoAllowSignupOnlyForMappedUsers", _dnsWebService._authManager.SsoAllowSignupOnlyForMappedUsers);
-                jsonWriter.WriteBoolean("ssoUseQueryResponseMode", _dnsWebService._authManager.SsoUseQueryResponseMode);
+                jsonWriter.WriteBoolean("ssoAllowInsecureHttp", _dnsWebService._authManager.SsoAllowInsecureHttp);
 
                 jsonWriter.WriteStartArray("ssoGroupMap");
 
@@ -1779,11 +1779,11 @@ namespace DnsServerCore
                     _dnsWebService._authManager.SsoGroupMap = new Dictionary<string, string>(ssoGroupMapEntries);
                 }
 
-                if (request.TryGetQueryOrForm("ssoUseQueryResponseMode", bool.Parse, out bool ssoUseQueryResponseMode))
+                if (request.TryGetQueryOrForm("ssoAllowInsecureHttp", bool.Parse, out bool ssoAllowInsecureHttp))
                 {
-                    if (_dnsWebService._authManager.SsoUseQueryResponseMode != ssoUseQueryResponseMode)
+                    if (_dnsWebService._authManager.SsoAllowInsecureHttp != ssoAllowInsecureHttp)
                     {
-                        _dnsWebService._authManager.SsoUseQueryResponseMode = ssoUseQueryResponseMode;
+                        _dnsWebService._authManager.SsoAllowInsecureHttp = ssoAllowInsecureHttp;
                         restartWebService = true;
                     }
                 }

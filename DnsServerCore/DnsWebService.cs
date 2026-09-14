@@ -1743,7 +1743,25 @@ namespace DnsServerCore
                     options.ClientSecret = _authManager.SsoClientSecret;
                     options.RequireHttpsMetadata = false;
                     options.ResponseType = OpenIdConnectResponseType.Code;
-                    options.ResponseMode = _authManager.SsoUseQueryResponseMode ? OpenIdConnectResponseMode.Query : OpenIdConnectResponseMode.FormPost;
+
+                    if (_authManager.SsoAllowInsecureHttp)
+                    {
+                        //form_post is a cross-site POST back to this callback; the correlation and nonce
+                        //cookies the framework sets before the redirect default to SameSite=None with
+                        //SecurePolicy=Always, which a browser will neither store nor send back over plain
+                        //HTTP. Query mode is a same-navigation GET redirect, which only needs SameSite=Lax,
+                        //so both the response mode and the cookie policy need to relax together for SSO to
+                        //complete when the web console itself isn't served over HTTPS.
+                        options.ResponseMode = OpenIdConnectResponseMode.Query;
+                        options.CorrelationCookie.SameSite = SameSiteMode.Lax;
+                        options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                        options.NonceCookie.SameSite = SameSiteMode.Lax;
+                        options.NonceCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                    }
+                    else
+                    {
+                        options.ResponseMode = OpenIdConnectResponseMode.FormPost;
+                    }
 
                     _ssoHttpHandler?.Dispose();
                     _ssoHttpClient?.Dispose();
