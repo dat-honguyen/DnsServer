@@ -1743,7 +1743,7 @@ namespace DnsServerCore
                     options.ClientSecret = _authManager.SsoClientSecret;
                     options.RequireHttpsMetadata = false;
                     options.ResponseType = OpenIdConnectResponseType.Code;
-                    options.ResponseMode = OpenIdConnectResponseMode.FormPost;
+                    options.ResponseMode = _authManager.SsoUseQueryResponseMode ? OpenIdConnectResponseMode.Query : OpenIdConnectResponseMode.FormPost;
 
                     _ssoHttpHandler?.Dispose();
                     _ssoHttpClient?.Dispose();

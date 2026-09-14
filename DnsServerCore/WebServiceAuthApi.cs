@@ -352,6 +352,7 @@ namespace DnsServerCore
 
                 jsonWriter.WriteBoolean("ssoAllowSignup", _dnsWebService._authManager.SsoAllowSignup);
                 jsonWriter.WriteBoolean("ssoAllowSignupOnlyForMappedUsers", _dnsWebService._authManager.SsoAllowSignupOnlyForMappedUsers);
+                jsonWriter.WriteBoolean("ssoUseQueryResponseMode", _dnsWebService._authManager.SsoUseQueryResponseMode);
 
                 jsonWriter.WriteStartArray("ssoGroupMap");
 
@@ -1776,6 +1777,15 @@ namespace DnsServerCore
                 }, 2, out KeyValuePair<string, string>[] ssoGroupMapEntries, '|'))
                 {
                     _dnsWebService._authManager.SsoGroupMap = new Dictionary<string, string>(ssoGroupMapEntries);
+                }
+
+                if (request.TryGetQueryOrForm("ssoUseQueryResponseMode", bool.Parse, out bool ssoUseQueryResponseMode))
+                {
+                    if (_dnsWebService._authManager.SsoUseQueryResponseMode != ssoUseQueryResponseMode)
+                    {
+                        _dnsWebService._authManager.SsoUseQueryResponseMode = ssoUseQueryResponseMode;
+                        restartWebService = true;
+                    }
                 }
 
                 _dnsWebService._log.Write(_dnsWebService.GetRemoteEndPoint(context), "[" + sessionUser.Username + "] SSO config was updated successfully.");

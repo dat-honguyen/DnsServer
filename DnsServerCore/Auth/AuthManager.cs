@@ -60,6 +60,7 @@ namespace DnsServerCore.Auth
         bool _ssoAllowSignup;
         bool _ssoAllowSignupOnlyForMappedUsers = true;
         IReadOnlyDictionary<string, string> _ssoGroupMap;
+        bool _ssoUseQueryResponseMode;
 
         readonly Lock _saveLock = new Lock();
         bool _pendingSave;
@@ -246,6 +247,10 @@ namespace DnsServerCore.Auth
                 string strSsoAllowSignupOnlyForMappedUsers = Environment.GetEnvironmentVariable("DNS_SERVER_SSO_ALLOW_SIGNUP_ONLY_FOR_MAPPED_USERS");
                 if (!string.IsNullOrEmpty(strSsoAllowSignupOnlyForMappedUsers))
                     SsoAllowSignupOnlyForMappedUsers = bool.Parse(strSsoAllowSignupOnlyForMappedUsers);
+
+                string strSsoUseQueryResponseMode = Environment.GetEnvironmentVariable("DNS_SERVER_SSO_USE_QUERY_RESPONSE_MODE");
+                if (!string.IsNullOrEmpty(strSsoUseQueryResponseMode))
+                    SsoUseQueryResponseMode = bool.Parse(strSsoUseQueryResponseMode);
 
                 string strGroupMap = Environment.GetEnvironmentVariable("DNS_SERVER_SSO_GROUP_MAP");
                 if (!string.IsNullOrEmpty(strGroupMap))
@@ -543,6 +548,16 @@ namespace DnsServerCore.Auth
                             }
                         }
 
+                        if (version >= 4)
+                        {
+                            bool ssoUseQueryResponseMode = bR.ReadBoolean();
+                            if (_ssoUseQueryResponseMode != ssoUseQueryResponseMode)
+                            {
+                                _ssoUseQueryResponseMode = ssoUseQueryResponseMode;
+                                restartWebService = true;
+                            }
+                        }
+
                         restartWebService = !ssoIsStillDisabled && restartWebService;
                     }
 
@@ -616,7 +631,7 @@ namespace DnsServerCore.Auth
             BinaryWriter bW = new BinaryWriter(s);
 
             bW.Write(Encoding.ASCII.GetBytes("AS")); //format
-            bW.Write((byte)3); //version
+            bW.Write((byte)4); //version
 
             bW.Write(Convert.ToByte(_groups.Count));
 
@@ -699,6 +714,8 @@ namespace DnsServerCore.Auth
                     s.WriteShortString(entry.Value);
                 }
             }
+
+            bW.Write(_ssoUseQueryResponseMode);
         }
 
         #endregion
@@ -1462,6 +1479,12 @@ namespace DnsServerCore.Auth
 
         public bool SsoManagedGroups
         { get { return _ssoGroupMap is not null; } }
+
+        public bool SsoUseQueryResponseMode
+        {
+            get { return _ssoUseQueryResponseMode; }
+            set { _ssoUseQueryResponseMode = value; }
+        }
 
         #endregion
     }
